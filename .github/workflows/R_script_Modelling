@@ -1,0 +1,181 @@
+rm(list=ls())
+path_data = "/home/joanpere/Modelling_data"
+path_dat_nc = "/home/joanpere/Modelling_data/For_R"
+setwd(path_data)
+
+### PACKAGES ###
+
+library(xlsx)
+library(ggplot2)
+library(sp)
+library(raster)
+source("https://raw.githubusercontent.com/briatte/ggcorr/master/ggcorr.R")
+library(corrplot)
+library(ade4) ## pca
+library(foreign) ## read dbf
+library(rgdal)
+library(ncdf4)
+library(spThin)
+
+##########################################################################################################
+                                        ###PREPARE DATABASES###
+##########################################################################################################
+
+## PRESENCES ##
+
+setwd(path_data)
+tab_cardui = read.xlsx(file=paste0(path_data,"/cardui_presence_v0.xlsx"),sheetName="Sheet1",header=T)
+
+colnames(tab_cardui)
+
+## CONVERT Larvae.numbers IN REAL NUMBERS FOR REPLICATION OF OCCURRENCE POINTS ##
+
+tab_cardui$Larvae.numbers = sub("[>~?]","",tab_cardui$Larvae.numbers)
+tab_cardui$Larvae.numbers[which(tab_cardui$Larvae.numbers %in% c(""))] = NA
+tab_cardui$Larvae.numbers[which(tab_cardui$Larvae.numbers=="2 (but 100 empty shelters)")] = 100 #2
+tab_cardui$Larvae.numbers[which(tab_cardui$Larvae.numbers=="20 (but  100 empty shelters)")] = 100 #20
+tab_cardui$Larvae.numbers[which(tab_cardui$Larvae.numbers=="21000 adults + pupae+ 1 larva + oviposition")] = 1000 #NA
+tab_cardui$Larvae.numbers[which(tab_cardui$Larvae.numbers=="oviposition")] = 1
+tab_cardui$Larvae.numbers[which(tab_cardui$Larvae.numbers=="100-1000")] = 500
+tab_cardui$Larvae.numbers[which(tab_cardui$Larvae.numbers=="Infestation")] = 500
+
+tab_cardui$Larvae.numbers = as.numeric(tab_cardui$Larvae.numbers)
+
+## SUBSET AND THINNING EUROPE BY SAMPLING PROXIMITY ##
+
+head(tab_cardui)
+tab_cardui_europe<-subset(tab_cardui, Region=="Europe")
+head(tab_cardui_europe)
+
+# SUBSET EUROPE SAMPLING BY MONTH #
+
+tab_cardui_europe_jan<-subset(tab_cardui_europe, Month==1)
+tab_cardui_europe_feb<-subset(tab_cardui_europe, Month==2)
+tab_cardui_europe_mar<-subset(tab_cardui_europe, Month==3)
+tab_cardui_europe_apr<-subset(tab_cardui_europe, Month==4)
+tab_cardui_europe_may<-subset(tab_cardui_europe, Month==5)
+tab_cardui_europe_jun<-subset(tab_cardui_europe, Month==6)
+tab_cardui_europe_jul<-subset(tab_cardui_europe, Month==7)
+tab_cardui_europe_aug<-subset(tab_cardui_europe, Month==8)
+tab_cardui_europe_sep<-subset(tab_cardui_europe, Month==9)
+tab_cardui_europe_oct<-subset(tab_cardui_europe, Month==10)
+tab_cardui_europe_nov<-subset(tab_cardui_europe, Month==11)
+tab_cardui_europe_dec<-subset(tab_cardui_europe, Month==12)
+
+# DISTRIBUTION OF OUR DATA WITH BARPLOTS #
+
+barplot(table(tab_cardui_europe_jan$Year),las=2)
+barplot(table(tab_cardui_europe_feb$Year),las=2)
+barplot(table(tab_cardui_europe_mar$Year),las=2)
+barplot(table(tab_cardui_europe_apr$Year),las=2)
+barplot(table(tab_cardui_europe_may$Year),las=2)
+barplot(table(tab_cardui_europe_jun$Year),las=2)
+barplot(table(tab_cardui_europe_jul$Year),las=2)
+barplot(table(tab_cardui_europe_aug$Year),las=2)
+barplot(table(tab_cardui_europe_sep$Year),las=2)
+barplot(table(tab_cardui_europe_oct$Year),las=2)
+barplot(table(tab_cardui_europe_nov$Year),las=2)
+barplot(table(tab_cardui_europe_dec$Year),las=2)
+
+# EXPLORE SAMPLING REPARTITION #
+
+tmp_day = as.numeric(as.character(tab_cardui$Day))
+barplot(table(tmp_day))
+barplot(table(tab_cardui$Month))
+barplot(table(tab_cardui$Year),las=2)
+barplot(table(tab_cardui$Country),las=2)
+
+tab_melt = data.frame(Day=tmp_day,Month=tab_cardui$Month,Year=tab_cardui$Year)
+ggplot(tab_melt,aes(factor(Year),fill=factor(Month))) +
+  geom_bar()
+table(tab_melt$Year,tab_melt$Month)
+
+# SAVE COORDINATES FOR ALL RELEVES #
+
+XY = tab_cardui[,c("Lat","Long","Month","Larvae.numbers")]
+save(XY,file="XY_WGS84")
+
+## ABSENCES ##
+
+tab_cardui_abs = read.xlsx(file=paste0(path_data,"/cardui_absence.xlsx"),sheetName="Sheet1",header=T)
+colnames(tab_cardui_abs)
+
+# RANDOMIZE ABSENCES #
+
+tab_cardui_abs$Year = sample(1975:2018,nrow(tab_cardui_abs),replace=T)
+
+## SAVE COORDINATES FOR ALL ABSENCES ##
+
+XY_ABS = tab_cardui_abs[,c("Lat","Long","Month")]
+save(XY_ABS,file="XY_WGS84_ABS")
+
+##########################################################################################################
+                                        ###GET CLIMATIC DATA###
+##########################################################################################################
+
+## BUILDING LAYERS FOR PRE, TMP, VAP, WET ##
+
+vars = c("pre","tmp","vap","wet")
+periods = c("1901.1910","1911.1920","1921.1930","1931.1940","1941.1950","1951.1960","1961.1970","1971.1980","1981.1990","1991.2000","2001.2010","2011.2020")
+combi = as.vector(sapply(1901:2020,function(x) paste0(x,".",c(paste0("0",1:9),10:12))))
+
+for(vari in vars){
+  cat("\n ========> VARIABLE ",vari, "<======== \n")
+  eval(parse(text=paste0("ras_",vari," = brick()")))
+  for(period in periods){
+    cat(" ",period)
+    ## Load data and cut it to the right extent
+    ras = brick(paste0("/home/joanpere/Modelling_data/cru_ts4.05.",period,".",vari,".dat.nc")) 
+    ras = crop(ras,extent(-20,60,-5,70))
+    NAvalue(ras)<- -9999
+    
+    ## Keep only layers wanted
+    tmp_names = strtrim(sub("X","",names(ras)),7)
+    ras = ras[[which(tmp_names %in% combi)]]
+    
+    ## Incorporte into the variable stack
+    eval(parse(text=paste0("ras_",vari," = addLayer(ras_",vari,",ras)")))
+  }
+  eval(parse(text=paste0("save(ras_",vari,",file='/home/joanpere/Modelling_data/nc_files/ras_",vari,"')")))
+  eval(parse(text=paste0("writeRaster(ras_",vari,",filename='/home/joanpere/Modelling_data/nc_files/ras_",vari,".img',format='ascii', bylayer=TRUE, suffix='names', overwrite=TRUE)")))
+}
+
+## GET CLIMATIC DATA BY MONTH ##
+
+for(vari in vars){
+  cat("\n ========> VARIABLE ",vari, "<======== \n")
+  
+  ## Load file by variable with all dates
+  eval(parse(text=paste0("load(file='/home/joanpere/Modelling_data/nc_files/ras_",vari,"')")))
+  eval(parse(text=paste0("names(ras_",vari,") = gsub('[.]','_',names(ras_",vari,"))")))
+  
+  ## Aggregate over all months and years (mean)
+  for(mm in c(paste0('0',1:9),'10','11','12')){
+    eval(parse(text=paste0("ras_",vari,"_",mm," = mean(ras_",vari,"[[grep('_",mm,"_',names(ras_",vari,"))]],na.rm=T)")))
+    eval(parse(text=paste0("save(ras_",vari,"_",mm,",file='/home/joanpere/Modelling_data/nc_files/ras_",vari,"_",mm,"')")))
+  }
+}
+
+## CREATE A MASK OF THE STUDIED AREA ##
+
+for(vari in vars){
+  load(paste0("/home/joanpere/Modelling_data/nc_files/ras_",vari))
+}
+
+eval(parse(text=paste0("mask = ",paste0("ras_",vars,"[[1]]",collapse="+"))))
+mask[which(!is.na(mask[]))] = 1
+names(mask) = "mask"
+plot(mask)
+save(mask, file = "mask.pdf")
+writeRaster(mask,filename="MASK.img",overwrite=T)
+
+## CREATE MASK FOR EACH LAND USE TYPE WITH PROPORTION WITHIN EACH PIXEL ##
+
+mask = raster("MASK.img")
+ind_notNA = which(!is.na(mask[]))
+LU_proportion = read.dbf("tabulate_prct.dbf") #this archive is already placed in the correct folder
+type_LU = colnames(LU_proportion)[-1]
+head(LU_proportion)
+
+
+
