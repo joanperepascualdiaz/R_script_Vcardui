@@ -1,9 +1,9 @@
 rm(list=ls())
 path_data = "/home/joanpere/Modelling_data/"
 path_dat_nc = "/home/joanpere/Modelling_data/files_nc/"
-path_data_prep = "/home/joanpere/Modelling_data/prep/"
+path_data_prep = "/home/joanpere/Modelling_data/files_prep/"
 path_LU = "/home/joanpere/Modelling_data/LU_prep/"
-path_save = "/home/joanpere/Modelling_data/save/"
+path_save = "/home/joanpere/Modelling_data/path_save/"
 setwd(path_data)
 
 ### PACKAGES ###
@@ -165,7 +165,7 @@ for(vari in vars_clim){
 ## CREATE A MASK OF THE STUDIED AREA ##
 
 for(vari in vars_clim){
-  load(paste0("/Modelling_data/nc_files/ras_",vari))
+  load(paste0("/home/joanpere/Modelling_data/prep/ras_",vari))
 }
 
 eval(parse(text=paste0("mask = ",paste0("ras_",vars_clim,"[[1]]",collapse="+"))))
