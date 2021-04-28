@@ -203,7 +203,7 @@ bareland_LU = paste0("VALUE_",200)
 for(new_cat in c("open","closed","bareland")){
   tmp = mask
   tmp[ind_notNA] = rowSums(LU_proportion[,get(paste0(new_cat,"_LU")),drop=F],na.rm=T)
-  plot(tmp,main=new_cat)
+  #plot(tmp,main=new_cat) # Activate this if you have capabilities() with X11.
   assign(paste0("ras_",new_cat),tmp)
   eval(parse(text=paste0("save(ras_",new_cat,",file='/home/joanpere/Modelling_data/LU_prep/ras_LU_",new_cat,"')")))
   # eval(parse(text=paste0("writeRaster(ras_",new_cat,",filename='/home/joanpere/Modelling_data/LU_prep/ras_LU_",new_cat,"')")))
@@ -214,6 +214,8 @@ for(new_cat in c("open","closed","bareland")){
 ##########################################################################################################
 
 ## PLOT RELEVES BY MONTH ##
+
+names_month = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
 XY_months = split(XY[,c("Long","Lat")],XY$Month)
 pdf("Maps_by_month.pdf")
