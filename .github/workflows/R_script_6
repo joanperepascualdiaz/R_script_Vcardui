@@ -233,8 +233,8 @@ dev.off()
 ## This table will not be used after the calculation of PPM models. It is for now computed to have a look at
 ## correlations between variables for the points sampled and for BioMOD2
 
-INPUT = data.frame(X = tab_cardui$Long..Dec.Deg.,
-                   Y = tab_cardui$Lat..Dec.Deg.,
+INPUT = data.frame(X = tab_cardui$Long,
+                   Y = tab_cardui$Lat,
                    date = paste(tab_cardui$Year,sapply(paste0("0",tab_cardui$Month),function(x)
                      paste0(tail(strsplit(x,"")[[1]],2),collapse="")),sep="."),
                    YEAR = tab_cardui$Year,
