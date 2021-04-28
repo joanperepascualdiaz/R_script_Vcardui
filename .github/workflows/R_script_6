@@ -359,7 +359,7 @@ if(pointSelected=="occRep"){
 
 for(vari in vars_clim){
   for(mm in num_months){
-    eval(parse(text=paste0("load(file='/home/joanpere/Modelling_data/prep/ras_",vari,"_",mm,"')")))
+    eval(parse(text=paste0("load(file='/home/joanpere/Modelling_data/files_prep/ras_",vari,"_",mm,"')")))
   }
 }
 
