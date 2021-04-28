@@ -281,7 +281,7 @@ mask = raster("MASK.img")
 plot(mask)
 ind_notNA = which(!is.na(mask[]))
 
-vars_clim = c("pre","tmp","vap","wet","frs")
+vars_clim = c("cld", "dtr", "frs", "pet", "pre", "tmn", "tmp", "tmx", "vap", "wet")
 vars_LU = c("open","closed","bareland")
 vars = c(vars_clim,vars_LU)
 num_months = c(paste0('0',1:9),'10','11','12')
@@ -290,14 +290,14 @@ num_months = c(paste0('0',1:9),'10','11','12')
 
 for(vari in vars_clim){
   for(mm in num_months){
-    eval(parse(text=paste0("load(file='/home/joanpere/Modelling_data/prep/ras_",vari,"_",mm,"')")))
+    eval(parse(text=paste0("load(file='/home/joanpere/Modelling_data/files_prep/ras_",vari,"_",mm,"')")))
   }
 }
 
 ## GET LU BY MONTH ##
 
 for(vari in vars_LU){
-  eval(parse(text=paste0("load(file='/home/joanpere/Modelling_data/ras_LU/ras_LU_",vari,"')")))
+  eval(parse(text=paste0("load(file='/home/joanpere/Modelling_data/LU_prep/ras_LU_",vari,"')")))
   for(mm in num_months){
     eval(parse(text=paste0("ras_",vari,"_",mm," = ras_",vari)))
   }
