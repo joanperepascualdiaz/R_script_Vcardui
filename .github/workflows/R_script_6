@@ -142,8 +142,8 @@ for(vari in vars_clim){
     ## Incorporte into the variable stack
     eval(parse(text=paste0("ras_",vari," = addLayer(ras_",vari,",ras)")))
   }
-  eval(parse(text=paste0("save(ras_",vari,",file='/home/joanpere/Modelling_data/prep/ras_",vari,"')")))
-  eval(parse(text=paste0("writeRaster(ras_",vari,",filename='/home/joanpere/Modelling_data/prep/ras_",vari,".img',format='ascii', bylayer=TRUE, suffix='names', overwrite=TRUE)")))
+  eval(parse(text=paste0("save(ras_",vari,",file='/home/joanpere/Modelling_data/files_prep/ras_",vari,"')")))
+  eval(parse(text=paste0("writeRaster(ras_",vari,",filename='/home/joanpere/Modelling_data/files_prep/ras_",vari,".img',format='ascii', bylayer=TRUE, suffix='names', overwrite=TRUE)")))
 }
 
 ## GET CLIMATIC DATA BY MONTH ##
@@ -152,13 +152,13 @@ for(vari in vars_clim){
   cat("\n ========> VARIABLE ",vari, "<======== \n")
 
   ## Load file by variable with all dates
-  eval(parse(text=paste0("load(file='/home/joanpere/Modelling_data/prep/ras_",vari,"')")))
+  eval(parse(text=paste0("load(file='/home/joanpere/Modelling_data/files_prep/ras_",vari,"')")))
   eval(parse(text=paste0("names(ras_",vari,") = gsub('[.]','_',names(ras_",vari,"))")))
 
   ## Aggregate over all months and years (mean)
   for(mm in c(paste0('0',1:9),'10','11','12')){
     eval(parse(text=paste0("ras_",vari,"_",mm," = mean(ras_",vari,"[[grep('_",mm,"_',names(ras_",vari,"))]],na.rm=T)")))
-    eval(parse(text=paste0("save(ras_",vari,"_",mm,",file='/home/joanpere/Modelling_data/prep/ras_",vari,"_",mm,"')")))
+    eval(parse(text=paste0("save(ras_",vari,"_",mm,",file='/home/joanpere/Modelling_data/files_prep/ras_",vari,"_",mm,"')")))
   }
 }
 
