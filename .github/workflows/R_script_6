@@ -190,7 +190,7 @@ for(lu in type_LU){
   tmp = mask
   tmp[ind_notNA] = LU_proportion[,lu]
   plot(tmp,main=lu)
-  save(tmp,file=paste0("/home/joanpere/Modelling_data/ras_LU/ras_LU_",lu))
+  save(tmp,file=paste0("/home/joanpere/Modelling_data/LU_prep/ras_LU_",lu))
 }
 dev.off()
 
