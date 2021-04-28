@@ -27,7 +27,7 @@ library(spThin)
 ## PRESENCES ##
 
 setwd(path_data)
-tab_cardui = read.xlsx(file=paste0(path_data,"/3cardui_larvae_database_14VI17_resampled_Belgium_Netherlands.xlsx"),sheetName="Sheet1",header=T)
+tab_cardui = read.xlsx(file=paste0(path_data,"cardui_presence_v0.xlsx"),sheetName="Sheet1",header=T)
 
 colnames(tab_cardui)
 
