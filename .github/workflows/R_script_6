@@ -98,7 +98,7 @@ table(tab_melt$Year,tab_melt$Month)
 # SAVE COORDINATES FOR ALL RELEVES #
 
 XY_PRES = tab_cardui[,c("Lat","Long","Month","Larvae.numbers")]
-save(XY,file="XY_WGS84")
+save(XY_PRES,file="XY_WGS84")
 
 ## ABSENCES ##
 
@@ -215,9 +215,9 @@ for(new_cat in c("open","closed","bareland")){
 
 ## PLOT RELEVES BY MONTH ##
 
-names_month = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+names_months = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
-XY_months = split(XY[,c("Long","Lat")],XY$Month)
+XY_months = split(XY_PRES[,c("Long","Lat")],XY_PRES$Month)
 pdf("Maps_by_month.pdf")
 for(mm in 1:12){
   plot(mask,col="grey50",legend=F,main=names_months[mm])
