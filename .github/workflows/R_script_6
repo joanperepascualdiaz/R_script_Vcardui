@@ -131,7 +131,7 @@ for(vari in vars_clim){
   for(period in periods){
     cat(" ",period)
     ## Load data and cut it to the right extent
-    ras = brick(paste0("/home/joanpere/Modelling_data/nc_files/cru_ts4.05.",period,".",vari,".dat.nc"))
+    ras = brick(paste0("/home/joanpere/Modelling_data/files_nc/cru_ts4.05.",period,".",vari,".dat.nc"))
     ras = crop(ras,extent(-20,60,-5,70))
     NAvalue(ras)<- -9999
 
