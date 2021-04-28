@@ -165,7 +165,7 @@ for(vari in vars_clim){
 ## CREATE A MASK OF THE STUDIED AREA ##
 
 for(vari in vars_clim){
-  load(paste0("/home/joanpere/Modelling_data/prep/ras_",vari))
+  load(paste0("/home/joanpere/Modelling_data/files_prep/ras_",vari))
 }
 
 eval(parse(text=paste0("mask = ",paste0("ras_",vars_clim,"[[1]]",collapse="+"))))
