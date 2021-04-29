@@ -52,7 +52,7 @@ head(tab_cardui)
 tab_cardui_europe<-subset(tab_cardui, Region=="Europe")
 head(tab_cardui_europe)
 
-# SUBSET EUROPE SAMPLING BY MONTH # [Do not run it]
+# SUBSET EUROPE SAMPLING BY MONTH # [Do not run it.]
 
 tab_cardui_europe_jan<-subset(tab_cardui_europe, Month==1)
 tab_cardui_europe_feb<-subset(tab_cardui_europe, Month==2)
